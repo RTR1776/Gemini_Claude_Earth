@@ -123,6 +123,9 @@ async function init() {
       layerManager.toggleLayer(layer, e.target);
       if (layer === 'livequakes') layerManager.loadUSGSQuakes();
       if (layer === 'liveevents') layerManager.loadEONETEvents();
+      if (layer === 'fireballs') layerManager.loadFireballs();
+      if (layer === 'debris') layerManager.loadSpaceDebris();
+      if (layer === 'lightning') layerManager.loadLightning();
     });
   });
 

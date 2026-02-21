@@ -267,3 +267,118 @@ export const POP_CENTERS = [
     { n: 'Lagos Basin', lat: 6.5, lon: 3.5, d: 0.78 },
     { n: 'São Paulo Metro', lat: -23.5, lon: -46.6, d: 0.72 },
 ];
+
+// ════════════════════════════════════════════════════════════════
+// VOLCANOES — Major active/dormant volcanoes worldwide
+// Source: Smithsonian Global Volcanism Program
+// ════════════════════════════════════════════════════════════════
+export const VOLCANOES = [
+    // Pacific Ring of Fire - Western Pacific
+    { n: 'MOUNT FUJI', lat: 35.36, lon: 138.73, type: 'Stratovolcano', status: 'Active', lastEruption: '1707', note: 'Sacred mountain that will eventually betray every postcard printed of it.' },
+    { n: 'SAKURAJIMA', lat: 31.58, lon: 130.66, type: 'Stratovolcano', status: 'Erupting', lastEruption: '2024', note: 'Erupts almost daily. The neighbours pretend this is fine.' },
+    { n: 'MOUNT ASO', lat: 32.88, lon: 131.10, type: 'Caldera', status: 'Active', lastEruption: '2021', note: 'Largest caldera in Japan. The tourists are inside it.' },
+    { n: 'PINATUBO', lat: 15.14, lon: 120.35, type: 'Stratovolcano', status: 'Active', lastEruption: '1991', note: 'Cooled the planet by 0.5°C. Briefly undid human damage. Briefly.' },
+    { n: 'TAAL', lat: 14.01, lon: 120.99, type: 'Caldera', status: 'Active', lastEruption: '2022', note: 'A volcano on an island in a lake on an island. Geology trolling geography.' },
+    { n: 'KRAKATOA', lat: -6.10, lon: 105.42, type: 'Caldera', status: 'Active', lastEruption: '2023', note: 'Destroyed itself in 1883 then rebuilt. The cockroach of volcanoes.' },
+    { n: 'MERAPI', lat: -7.54, lon: 110.45, type: 'Stratovolcano', status: 'Active', lastEruption: '2023', note: 'Most active in Indonesia. A country of 127 active volcanoes.' },
+    { n: 'MOUNT AGUNG', lat: -8.34, lon: 115.51, type: 'Stratovolcano', status: 'Active', lastEruption: '2019', note: 'Bali\'s sacred destroyer. The tourists still come.' },
+    { n: 'MOUNT SEMERU', lat: -8.11, lon: 112.92, type: 'Stratovolcano', status: 'Erupting', lastEruption: '2024', note: 'Java\'s tallest. Currently having a tantrum.' },
+    { n: 'MOUNT RUAPEHU', lat: -39.28, lon: 175.57, type: 'Stratovolcano', status: 'Active', lastEruption: '2007', note: 'They built a ski resort on it. Peak human decision-making.' },
+    { n: 'WHITE ISLAND', lat: -37.52, lon: 177.18, type: 'Stratovolcano', status: 'Active', lastEruption: '2019', note: 'Tour operators took tourists into the crater. It ended predictably.' },
+    // Pacific Ring of Fire - Eastern Pacific
+    { n: 'MOUNT ST. HELENS', lat: 46.20, lon: -122.18, type: 'Stratovolcano', status: 'Active', lastEruption: '2008', note: 'Blew its top in 1980. Literally. The mountain is shorter now.' },
+    { n: 'MOUNT RAINIER', lat: 46.85, lon: -121.76, type: 'Stratovolcano', status: 'Active', lastEruption: '1894', note: 'Seattle built a city in its lahar zone. Bold.' },
+    { n: 'MOUNT SHASTA', lat: 41.41, lon: -122.19, type: 'Stratovolcano', status: 'Active', lastEruption: '1250', note: 'Dormant, plotting, covered in New Age conspiracy theories.' },
+    { n: 'YELLOWSTONE', lat: 44.43, lon: -110.59, type: 'Supervolcano', status: 'Active', lastEruption: '-70000', note: 'Extinction-level event parked under a national park. Humans camp on it.' },
+    { n: 'KILAUEA', lat: 19.42, lon: -155.29, type: 'Shield', status: 'Erupting', lastEruption: '2024', note: 'Continuously creating and destroying real estate simultaneously.' },
+    { n: 'MAUNA LOA', lat: 19.48, lon: -155.61, type: 'Shield', status: 'Active', lastEruption: '2022', note: 'Largest active volcano on Earth. The ocean hides most of it.' },
+    { n: 'POPOCATÉPETL', lat: 19.02, lon: -98.63, type: 'Stratovolcano', status: 'Erupting', lastEruption: '2024', note: '25 million people live within blast radius. Mexico City doesn\'t care.' },
+    { n: 'COLIMA', lat: 19.51, lon: -103.62, type: 'Stratovolcano', status: 'Active', lastEruption: '2019', note: 'Most active in Mexico. A persistent geological complaint.' },
+    // South America
+    { n: 'COTOPAXI', lat: -0.68, lon: -78.44, type: 'Stratovolcano', status: 'Active', lastEruption: '2023', note: 'Perfect cone. Will destroy Quito. Very photogenic.' },
+    { n: 'VILLARRICA', lat: -39.42, lon: -71.93, type: 'Stratovolcano', status: 'Active', lastEruption: '2024', note: 'Chile\'s most active. They ski on it. Of course they do.' },
+    // Europe & Atlantic
+    { n: 'MOUNT ETNA', lat: 37.75, lon: 14.99, type: 'Stratovolcano', status: 'Erupting', lastEruption: '2024', note: 'Europe\'s most active. Sicily treats it as a tourist attraction. Correct.' },
+    { n: 'STROMBOLI', lat: 38.79, lon: 15.21, type: 'Stratovolcano', status: 'Erupting', lastEruption: '2024', note: 'Has been erupting for 2000 years. The original lighthouse.' },
+    { n: 'VESUVIUS', lat: 40.82, lon: 14.43, type: 'Stratovolcano', status: 'Active', lastEruption: '1944', note: 'Buried Pompeii. 3 million now live in the danger zone. Lesson: unlearned.' },
+    { n: 'EYJAFJALLAJÖKULL', lat: 63.63, lon: -19.61, type: 'Stratovolcano', status: 'Active', lastEruption: '2010', note: 'Grounded all European flights. A volcano no newsreader could pronounce.' },
+    { n: 'KATLA', lat: 63.59, lon: -19.05, type: 'Subglacial', status: 'Active', lastEruption: '1918', note: 'Overdue. Under a glacier. Will produce biblical flooding.' },
+    { n: 'BÁRÐARBUNGA', lat: 64.64, lon: -17.53, type: 'Stratovolcano', status: 'Active', lastEruption: '2015', note: 'Iceland\'s largest caldera. Produced the biggest lava flow in 200 years.' },
+    { n: 'FAGRADALSFJALL', lat: 63.88, lon: -22.27, type: 'Shield', status: 'Erupting', lastEruption: '2024', note: 'Keeps erupting near Reykjavik. The Icelanders grill hotdogs and watch.' },
+    { n: 'LA PALMA (CUMBRE VIEJA)', lat: 28.57, lon: -17.84, type: 'Stratovolcano', status: 'Active', lastEruption: '2021', note: 'Buried a town in lava. The conspiracy theorists wanted a mega-tsunami.' },
+    // Africa & Middle East
+    { n: 'MOUNT NYIRAGONGO', lat: -1.52, lon: 29.25, type: 'Stratovolcano', status: 'Active', lastEruption: '2021', note: 'World\'s largest lava lake. Looms over Goma. 2 million in the path.' },
+    { n: 'ERTA ALE', lat: 13.60, lon: 40.67, type: 'Shield', status: 'Erupting', lastEruption: '2024', note: 'Permanent lava lake in the Danakil Depression. Hottest place on Earth.' },
+    { n: 'MOUNT KILIMANJARO', lat: -3.07, lon: 37.35, type: 'Stratovolcano', status: 'Dormant', lastEruption: '-360000', note: 'Not dead, just sleeping. The glaciers are melting off it regardless.' },
+    { n: 'OL DOINYO LENGAI', lat: -2.76, lon: 35.91, type: 'Stratovolcano', status: 'Active', lastEruption: '2024', note: 'Only volcano that erupts carbonatite lava. Cool to the touch. Literally.' },
+    // Indonesia extended
+    { n: 'MOUNT TAMBORA', lat: -8.25, lon: 118.00, type: 'Stratovolcano', status: 'Active', lastEruption: '1967', note: '1815 eruption caused "Year Without a Summer." Global famine. VEI 7.' },
+    { n: 'MOUNT SINABUNG', lat: 3.17, lon: 98.39, type: 'Stratovolcano', status: 'Active', lastEruption: '2021', note: 'Woke up in 2010 after 400 years. Currently very grumpy.' },
+    // Russia / Kamchatka
+    { n: 'KLYUCHEVSKOY', lat: 56.06, lon: 160.64, type: 'Stratovolcano', status: 'Erupting', lastEruption: '2024', note: 'Highest active volcano in Eurasia. Erupts roughly every year.' },
+    { n: 'SHIVELUCH', lat: 56.65, lon: 161.36, type: 'Stratovolcano', status: 'Active', lastEruption: '2023', note: 'Most explosive in Kamchatka. No one lives near it. Wise.' },
+    // Caribbean
+    { n: 'SOUFRIÈRE HILLS', lat: 16.72, lon: -62.18, type: 'Stratovolcano', status: 'Active', lastEruption: '2013', note: 'Destroyed Montserrat\'s capital. Two-thirds of the island evacuated permanently.' },
+    { n: 'LA SOUFRIÈRE', lat: 13.33, lon: -61.18, type: 'Stratovolcano', status: 'Active', lastEruption: '2021', note: 'St. Vincent. Erupted during a pandemic. The universe piling on.' },
+    // Antarctica
+    { n: 'MOUNT EREBUS', lat: -77.53, lon: 167.17, type: 'Stratovolcano', status: 'Erupting', lastEruption: '2024', note: 'Southernmost active volcano. Lava lake at the bottom of the world.' },
+    // Western US
+    { n: 'MOUNT HOOD', lat: 45.37, lon: -121.70, type: 'Stratovolcano', status: 'Active', lastEruption: '1866', note: 'Oregon\'s highest. Portland\'s scenic time bomb.' },
+    // Philippines extended
+    { n: 'MAYON', lat: 13.26, lon: 123.69, type: 'Stratovolcano', status: 'Active', lastEruption: '2024', note: 'The world\'s most perfect volcanic cone. Deadly and beautiful.' },
+    // New Zealand
+    { n: 'MOUNT TARANAKI', lat: -39.30, lon: 174.06, type: 'Stratovolcano', status: 'Active', lastEruption: '1854', note: 'Overdue. The insurance industry is nervous.' },
+    // Japan extended
+    { n: 'MOUNT UNZEN', lat: 32.76, lon: 130.29, type: 'Stratovolcano', status: 'Active', lastEruption: '1996', note: 'Killed 43 with pyroclastic flows in 1991. Including the volcanologists filming it.' },
+];
+
+// ════════════════════════════════════════════════════════════════
+// SHIPPING ROUTES — Top 40 global maritime trade routes
+// Source: IMO major shipping lane data
+// ════════════════════════════════════════════════════════════════
+export const SHIPPING_ROUTES = [
+    // Asia - Europe (via Suez)
+    { from: [31.27, 32.31], to: [22.28, 114.17], n: 'SUEZ-HONG KONG', note: 'The jugular vein of global trade.' },
+    { from: [1.26, 103.84], to: [31.27, 32.31], n: 'SINGAPORE-SUEZ', note: 'Every container of cheap goods passes through here.' },
+    { from: [51.89, 4.47], to: [31.27, 32.31], n: 'ROTTERDAM-SUEZ', note: 'Europe\'s artery to Asia. One stuck ship paralysed it in 2021.' },
+    { from: [53.55, 9.99], to: [22.28, 114.17], n: 'HAMBURG-HONG KONG', note: 'German engineering meets Chinese manufacturing.' },
+    // Trans-Pacific
+    { from: [34.74, 135.19], to: [33.72, -118.26], n: 'OSAKA-LOS ANGELES', note: 'The Pacific highway of consumer electronics.' },
+    { from: [22.28, 114.17], to: [33.72, -118.26], n: 'HONG KONG-LA', note: 'Where your Amazon packages begin their journey.' },
+    { from: [31.23, 121.47], to: [47.61, -122.34], n: 'SHANGHAI-SEATTLE', note: 'Container ships the size of aircraft carriers.' },
+    { from: [35.17, 129.08], to: [49.29, -123.11], n: 'BUSAN-VANCOUVER', note: 'South Korea to Canada. K-pop by sea.' },
+    { from: [1.26, 103.84], to: [33.72, -118.26], n: 'SINGAPORE-LA', note: 'Southeast Asia to the US. 7,800 nautical miles of freight.' },
+    // Trans-Atlantic
+    { from: [51.89, 4.47], to: [40.67, -74.04], n: 'ROTTERDAM-NEW YORK', note: 'The old world sending goods to the new. Again.' },
+    { from: [53.55, 9.99], to: [29.95, -90.07], n: 'HAMBURG-NEW ORLEANS', note: 'Into the Gulf. Oil, grain, chemicals.' },
+    { from: [50.95, 1.86], to: [42.35, -71.06], n: 'CALAIS-BOSTON', note: 'Cross-Atlantic express.' },
+    // Middle East Oil Routes
+    { from: [26.23, 50.21], to: [1.26, 103.84], n: 'BAHRAIN-SINGAPORE', note: 'Liquid dinosaurs heading east.' },
+    { from: [25.42, 56.37], to: [34.74, 135.19], n: 'FUJAIRAH-OSAKA', note: 'Hormuz Strait oil. The world\'s most valuable chokepoint.' },
+    { from: [26.23, 50.21], to: [22.28, 114.17], n: 'PERSIAN GULF-HK', note: 'Oil feeding the factory of the world.' },
+    { from: [25.42, 56.37], to: [51.89, 4.47], n: 'FUJAIRAH-ROTTERDAM', note: 'Arab oil to European refineries.' },
+    { from: [25.42, 56.37], to: [40.67, -74.04], n: 'FUJAIRAH-NEW YORK', note: 'The tanker highway across the Atlantic.' },
+    // Panama Canal routes
+    { from: [9.0, -79.5], to: [40.67, -74.04], n: 'PANAMA-NEW YORK', note: 'Shortcut between oceans. Humans carved through a continent for this.' },
+    { from: [22.28, 114.17], to: [9.0, -79.5], n: 'HONG KONG-PANAMA', note: 'Asia to the Americas via the ditch.' },
+    { from: [9.0, -79.5], to: [-23.55, -46.63], n: 'PANAMA-SAO PAULO', note: 'Latin American trade loop.' },
+    // Africa & South routes
+    { from: [-33.92, 18.42], to: [51.89, 4.47], n: 'CAPE TOWN-ROTTERDAM', note: 'Around the Cape. The original route before Suez.' },
+    { from: [6.45, 3.39], to: [51.89, 4.47], n: 'LAGOS-ROTTERDAM', note: 'Nigerian oil heading north.' },
+    { from: [-33.92, 18.42], to: [22.28, 114.17], n: 'CAPE TOWN-HONG KONG', note: 'The long way around. When Suez gets jammed.' },
+    { from: [-33.87, 151.21], to: [31.23, 121.47], n: 'SYDNEY-SHANGHAI', note: 'Iron ore and coal. Australia\'s real export.' },
+    // Strait of Malacca
+    { from: [1.26, 103.84], to: [-6.12, 106.85], n: 'SINGAPORE-JAKARTA', note: 'The narrowest bottleneck in global trade.' },
+    { from: [1.26, 103.84], to: [13.76, 100.50], n: 'SINGAPORE-BANGKOK', note: 'Intra-ASEAN trade corridor.' },
+    // Arctic emerging
+    { from: [69.65, 18.96], to: [35.17, 129.08], n: 'TROMSØ-BUSAN (ARCTIC)', note: 'Northern Sea Route. Climate change opened a shortcut. Silver lining of doom.' },
+    // India trade
+    { from: [19.08, 72.88], to: [1.26, 103.84], n: 'MUMBAI-SINGAPORE', note: 'India to Southeast Asia. Spice route modernised.' },
+    { from: [19.08, 72.88], to: [51.89, 4.47], n: 'MUMBAI-ROTTERDAM', note: 'Indian goods heading west through Suez.' },
+    // South America
+    { from: [-23.55, -46.63], to: [51.89, 4.47], n: 'SANTOS-ROTTERDAM', note: 'Brazilian commodities feeding Europe.' },
+    { from: [-34.60, -58.38], to: [22.28, 114.17], n: 'B.AIRES-HONG KONG', note: 'Soybeans and beef crossing the globe.' },
+    // Grain routes
+    { from: [46.48, 30.74], to: [30.04, 31.24], n: 'ODESSA-ALEXANDRIA', note: 'Ukrainian grain. When the war allows it.' },
+    { from: [29.95, -90.07], to: [6.45, 3.39], n: 'NEW ORLEANS-LAGOS', note: 'American grain to West Africa.' },
+];
