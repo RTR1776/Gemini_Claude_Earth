@@ -207,14 +207,6 @@ export class LayerManager {
             ...s, cat: 'ACTIVE CONFLICT ZONE', detail: `Severity: ${s.sev}`, deckard: s.note
         })), 0xff3c00, 0.035, 1.0, true, CROSSHAIR_TEX);
 
-        const cableGroup = new THREE.Group();
-        const cableMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending });
-        CABLES.forEach(c => {
-            const pts = getArcPoints(c.from[0], c.from[1], c.to[0], c.to[1]);
-            cableGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), cableMat));
-        });
-        this.layers['cables'] = cableGroup;
-
         this.flightGroup = new THREE.Group();
         this.layers['flights'] = this.flightGroup;
         this.activeFlights = new Map();
@@ -240,18 +232,6 @@ export class LayerManager {
             detail: `Type: ${s.type} | Status: ${s.status} | Last: ${s.lastEruption}`,
             deckard: s.note
         })), 0xff6600, 0.018, 0.95, true);
-
-        // SHIPPING ROUTES — major global maritime trade lanes
-        const shipGroup = new THREE.Group();
-        const shipMat = new THREE.LineBasicMaterial({
-            color: 0xffaa44, transparent: true, opacity: 0.35,
-            blending: THREE.AdditiveBlending
-        });
-        SHIPPING_ROUTES.forEach(r => {
-            const pts = getArcPoints(r.from[0], r.from[1], r.to[0], r.to[1]);
-            shipGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), shipMat));
-        });
-        this.layers['shipping'] = shipGroup;
     }
 
     inferFlightData(callsign, lat, lon, heading) {
@@ -418,6 +398,43 @@ export class LayerManager {
         } catch (e) {
             console.error(e);
             document.getElementById('ticker-msg').innerText = 'OPENSKY API RATE LIMITED. USING CACHED GHOST DATA...';
+            // Generate Mock Flights so the screen isn't empty when rate limited
+            const mockFlights = [];
+            const origins = ['United States', 'Russia', 'China', 'United Kingdom', 'France'];
+            for (let i = 0; i < 40; i++) {
+                const lat = -60 + Math.random() * 120;
+                const lon = -180 + Math.random() * 360;
+                const country = origins[Math.floor(Math.random() * origins.length)];
+                const colorHex = getCountryColorHex(country);
+                const trueTrack = Math.random() * 360;
+                mockFlights.push({
+                    lon, lat, color: colorHex,
+                    n: `GHOST-${Math.floor(Math.random() * 9999)} (${country})`,
+                    cat: 'SECURE MILITARY FLIGHT (GHOST)',
+                    detail: `Model: Classified | Route: SIGINT Ops`,
+                    stats: [`ALT: ${Math.floor(15000 + Math.random() * 25000)} ft`, `SPD: ${Math.floor(300 + Math.random() * 200)} kts`, `HDG: ${Math.round(trueTrack)}°`, `NAT: ${country.toUpperCase()}`],
+                    deckard: `Classified military movements. Your tax dollars converting kinetic energy into global anxiety.`
+                });
+
+                const deg2rad = Math.PI / 180;
+                const distDist = 15;
+                const oLat = lat - Math.cos(trueTrack * deg2rad) * distDist;
+                const oLon = lon - Math.sin(trueTrack * deg2rad) * distDist;
+                const dLat = lat + Math.cos(trueTrack * deg2rad) * distDist;
+                const dLon = lon + Math.sin(trueTrack * deg2rad) * distDist;
+
+                const oPts = getArcPoints(oLat, oLon, lat, lon);
+                const oMat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+                this.flightGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(oPts), oMat));
+
+                const dPts = getArcPoints(lat, lon, dLat, dLon);
+                const dMat = new THREE.LineDashedMaterial({ color: colorHex, transparent: true, opacity: 0.3, dashSize: 0.05, gapSize: 0.05, blending: THREE.AdditiveBlending });
+                const dLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(dPts), dMat);
+                dLine.computeLineDistances();
+                this.flightGroup.add(dLine);
+            }
+            const points = this.createPointLayer(mockFlights, 0xffffff, 0.04, 1.0, true, PLANE_TEX, true);
+            this.flightGroup.add(points);
         }
     }
 
