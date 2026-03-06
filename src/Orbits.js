@@ -6,16 +6,16 @@ import * as THREE from 'three';
  */
 
 const SAT_CONFIGS = [
-    { inc: 0.35, speed: 3.5, color: 0xffff00, alt: 1.03 },
-    { inc: 0.80, speed: 2.8, color: 0xff8800, alt: 1.04 },
-    { inc: 0.10, speed: 2.2, color: 0x00ffff, alt: 1.05 },
-    { inc: 0.60, speed: 1.5, color: 0xff00ff, alt: 1.08 },
-    { inc: 0.05, speed: 0.8, color: 0xffffff, alt: 1.15 },
-    { inc: 0.98, speed: 3.0, color: 0x88ff88, alt: 1.03 },
-    { inc: 0.45, speed: 2.5, color: 0xff4444, alt: 1.04 },
-    { inc: 0.70, speed: 1.8, color: 0x4488ff, alt: 1.06 },
-    { inc: 0.52, speed: 2.0, color: 0xffaa00, alt: 1.07 },
-    { inc: 0.30, speed: 3.2, color: 0x00ff88, alt: 1.03 },
+    { inc: 0.35, speed: 0.17, color: 0xffff00, alt: 1.03 },
+    { inc: 0.80, speed: 0.14, color: 0xff8800, alt: 1.04 },
+    { inc: 0.10, speed: 0.11, color: 0x00ffff, alt: 1.05 },
+    { inc: 0.60, speed: 0.07, color: 0xff00ff, alt: 1.08 },
+    { inc: 0.05, speed: 0.04, color: 0xffffff, alt: 1.15 },
+    { inc: 0.98, speed: 0.15, color: 0x88ff88, alt: 1.03 },
+    { inc: 0.45, speed: 0.12, color: 0xff4444, alt: 1.04 },
+    { inc: 0.70, speed: 0.09, color: 0x4488ff, alt: 1.06 },
+    { inc: 0.52, speed: 0.10, color: 0xffaa00, alt: 1.07 },
+    { inc: 0.30, speed: 0.16, color: 0x00ff88, alt: 1.03 },
 ];
 
 export class EarthOrbits {
@@ -84,19 +84,40 @@ export class EarthOrbits {
     }
 
     createSatellites() {
+        let idCounter = 1;
         SAT_CONFIGS.forEach(cfg => {
-            const geo = new THREE.SphereGeometry(0.005, 6, 6);
+            const group = new THREE.Group();
+
+            const geo = new THREE.SphereGeometry(0.007, 8, 8);
             const mat = new THREE.MeshBasicMaterial({ color: cfg.color });
             const mesh = new THREE.Mesh(geo, mat);
-            this.scene.add(mesh);
+            group.add(mesh);
+
+            // Invisible, larger hit sphere for easier raycasting
+            const hitGeo = new THREE.SphereGeometry(0.025, 8, 8);
+            const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+            const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+            group.add(hitMesh);
+
+
+            // Make hitmesh interactable instead of visual mesh
+            hitMesh.userData = {
+                isInteractable: true,
+                dataArray: [{
+                    cat: 'ORBITAL ASSET',
+                    title: `SATELLITE INT-${idCounter++}`,
+                    detail: `Orbit Type: LEO | Inc: ${Math.round(cfg.inc * (180 / Math.PI))}°`,
+                    deckard: 'More space junk cluttering up the void. Classic human behavior.'
+                }]
+            };
+
+            this.scene.add(group);
 
             this.satellites.push({
-                mesh,
-                alt: cfg.alt,
-                inc: cfg.inc,
-                speed: cfg.speed,
-                startAngle: Math.random() * Math.PI * 2,
-                raan: Math.random() * Math.PI * 2
+                mesh: group,
+                hitMesh: hitMesh,
+                cfg: cfg,
+                angle: Math.random() * Math.PI * 2
             });
         });
     }

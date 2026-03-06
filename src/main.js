@@ -120,12 +120,25 @@ async function init() {
   document.querySelectorAll('.layer-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const layer = e.target.dataset.layer;
+
+      // Handle custom satellite toggle
+      if (layer === 'satellites') {
+        e.target.classList.toggle('active');
+        const isActive = e.target.classList.contains('active');
+        earthOrbits.satellites.forEach(s => s.mesh.visible = isActive);
+        return;
+      }
+
       layerManager.toggleLayer(layer, e.target);
-      if (layer === 'livequakes') layerManager.loadUSGSQuakes();
+      if (layer === 'seismic') {
+        layerManager.loadUSGSQuakes();
+        if (!layerManager.layers['volcanoes'].visible) layerManager.layers['volcanoes'].visible = true;
+      }
       if (layer === 'liveevents') layerManager.loadEONETEvents();
-      if (layer === 'fireballs') layerManager.loadFireballs();
-      if (layer === 'debris') layerManager.loadSpaceDebris();
-      if (layer === 'lightning') layerManager.loadLightning();
+      if (layer === 'debris') {
+        layerManager.loadSpaceDebris();
+        layerManager.loadFireballs();
+      }
     });
   });
 
@@ -305,6 +318,8 @@ async function init() {
       scene.children.forEach(obj => {
         if (obj.isPoints) targets.push(obj);
       });
+      earthOrbits.satellites.forEach(s => targets.push(s.mesh));
+
       const intersects = raycaster.intersectObjects(targets, false);
 
       if (intersects.length > 0) {
@@ -317,6 +332,13 @@ async function init() {
             hit.object.userData &&
             hit.object.userData.dataArray) {
             const dataItem = hit.object.userData.dataArray[hit.index];
+            if (hoveredObject !== dataItem) {
+              hud.showPointInfo(dataItem);
+              hoveredObject = dataItem;
+            }
+          } else if (hit.object.userData && hit.object.userData.dataArray) {
+            // For Meshes (like satellites) that don't use instanced/points indexing
+            const dataItem = hit.object.userData.dataArray[0];
             if (hoveredObject !== dataItem) {
               hud.showPointInfo(dataItem);
               hoveredObject = dataItem;

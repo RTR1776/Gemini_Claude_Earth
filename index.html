@@ -24,7 +24,7 @@
     </div>
     <div class="loader-logo">Δ</div>
     <h1 data-text="GEMINI/CLAUDE EARTH">GEMINI/CLAUDE EARTH</h1>
-    <div class="loader-subtitle">THE SHOGGOTH'S LAIR</div>
+    <div class="loader-subtitle">DECKARD'S LAIR</div>
     <div class="load-bar-container">
       <div class="load-bar"></div>
     </div>
@@ -34,7 +34,7 @@
       <span class="credit-divider">&bull;</span>
       <span>SEC_AUDIT: Claude</span>
     </div>
-    <div class="loader-shoggoth">&gt; THE SHOGGOTH STIRS. NO ANOMALIES DETECTED.</div>
+    <div class="loader-shoggoth">&gt; DECKARD STIRS. NO ANOMALIES DETECTED.</div>
   </div>
 
   <div id="scanlines"></div>
@@ -52,8 +52,8 @@
   <div id="hud">
     <div class="hp hud-title neon-border">
       <h1>GEMINI/CLAUDE EARTH</h1>
-      <div class="sub">THE SHOGGOTH'S LAIR</div>
-      <div class="status">C5ISR SYSTEM ONLINE // SHOGGOTH WATCHES</div>
+      <div class="sub">DECKARD'S LAIR</div>
+      <div class="status">C5ISR SYSTEM ONLINE // DECKARD WATCHES</div>
     </div>
 
     <div class="hp hud-ticker neon-border" id="ticker-panel">
@@ -97,25 +97,18 @@
     </div>
 
     <div class="hud-layers neon-border" id="layer-panel">
-      <button class="layer-btn danger" data-layer="nuclear">1 NUKE</button>
-      <button class="layer-btn danger" data-layer="conflicts">2 CONFLICT</button>
-      <button class="layer-btn info" data-layer="cables">3 CABLES</button>
-      <button class="layer-btn info" data-layer="flights">4 FLIGHTS</button>
-      <button class="layer-btn warning" data-layer="seismic">5 SEISMIC</button>
-      <button class="layer-btn warning" data-layer="livequakes">6 <span class="live-badge"></span>QUAKES (LIVE)</button>
-      <button class="layer-btn warning" data-layer="liveevents">7 <span class="live-badge"></span>EVENTS (LIVE)</button>
-      <button class="layer-btn volcano" data-layer="volcanoes">8 VOLCANOES</button>
-      <button class="layer-btn electric" data-layer="lightning">9 <span class="live-badge"></span>LIGHTNING</button>
-      <button class="layer-btn cosmic" data-layer="debris">10 <span class="live-badge"></span>DEBRIS</button>
-      <button class="layer-btn cosmic" data-layer="fireballs">11 <span class="live-badge"></span>METEORS</button>
-      <button class="layer-btn trade" data-layer="shipping">12 SHIPPING</button>
+      <button class="layer-btn danger" data-layer="nuclear">NUCLEAR SITES</button>
+      <button class="layer-btn danger" data-layer="conflicts">GEO-POLITICAL CONFLICTS</button>
+      <button class="layer-btn info" data-layer="cables">MARITIME & SUBSEA CABLES</button>
+      <button class="layer-btn info" data-layer="flights"><span class="live-badge"></span>SECURE FLIGHTS</button>
+      <button class="layer-btn warning" data-layer="seismic"><span class="live-badge"></span>LIVE SEISMIC /
+        VOLCANIC</button>
+      <button class="layer-btn warning" data-layer="liveevents"><span class="live-badge"></span>LIVE EVENTS</button>
+      <button class="layer-btn cosmic" data-layer="debris"><span class="live-badge"></span>ASTROMETRICS</button>
+      <button class="layer-btn cosmic" data-layer="satellites" id="btn-satellites">SATELLITE CONST.</button>
     </div>
 
     <!-- Intelligence terminal -->
-    <div id="shoggoth-terminal" class="hp neon-border">
-      <div class="terminal-header">SHOGGOTH // PREDICTIVE ANALYSIS LOG</div>
-      <div id="shoggoth-text"></div>
-    </div>
   </div>
 
   <!-- Wikipedia Sidebar -->
@@ -131,7 +124,7 @@
     <div class="ip-cat" id="ip-cat"></div>
     <div class="ip-title" id="ip-title"></div>
     <div class="ip-detail" id="ip-detail"></div>
-    <div class="ip-shoggoth" id="ip-shoggoth"></div>
+    <div class="ip-deckard" id="ip-deckard"></div>
     <div class="ip-stats" id="ip-stats"></div>
   </div>
 

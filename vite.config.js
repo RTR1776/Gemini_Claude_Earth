@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    base: '/Gemini_Claude_Earth/',
+    base: '/',
     server: {
         proxy: {
             '/nominatim': {

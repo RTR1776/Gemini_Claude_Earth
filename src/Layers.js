@@ -31,6 +31,95 @@ function getArcPoints(lat1, lon1, lat2, lon2, segments = 32) {
     return pts;
 }
 
+// Texture generators to avoid square points
+function createGlowDotTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64; canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+    grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(canvas);
+}
+
+function createMushroomTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64; canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.font = '48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🍄', 32, 36);
+    return new THREE.CanvasTexture(canvas);
+}
+
+function createCrosshairTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64; canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(32, 32, 24, 0, Math.PI * 2);
+    ctx.moveTo(32, 0); ctx.lineTo(32, 16);
+    ctx.moveTo(32, 48); ctx.lineTo(32, 64);
+    ctx.moveTo(0, 32); ctx.lineTo(16, 32);
+    ctx.moveTo(48, 32); ctx.lineTo(64, 32);
+    ctx.stroke();
+    return new THREE.CanvasTexture(canvas);
+}
+
+function createWhiteAirplaneTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64; canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+
+    ctx.translate(32, 32);
+    ctx.beginPath();
+    ctx.moveTo(0, -20);
+    ctx.lineTo(4, -8);
+    ctx.lineTo(24, 4);
+    ctx.lineTo(24, 8);
+    ctx.lineTo(4, 4);
+    ctx.lineTo(2, 16);
+    ctx.lineTo(8, 20);
+    ctx.lineTo(8, 24);
+    ctx.lineTo(0, 20);
+    ctx.lineTo(-8, 24);
+    ctx.lineTo(-8, 20);
+    ctx.lineTo(-2, 16);
+    ctx.lineTo(-4, 4);
+    ctx.lineTo(-24, 8);
+    ctx.lineTo(-24, 4);
+    ctx.lineTo(-4, -8);
+    ctx.closePath();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    return new THREE.CanvasTexture(canvas);
+}
+
+function getCountryColorHex(country) {
+    country = country.toLowerCase();
+    if (country.includes('united states')) return 0x0033a0;
+    if (country.includes('kingdom')) return 0xc8102e;
+    if (country.includes('russia')) return 0xd50032;
+    if (country.includes('china')) return 0xffde00;
+    if (country.includes('canada')) return 0xff0000;
+    if (country.includes('france')) return 0x0055a4;
+    return 0x888888;
+}
+
+const GLOW_TEX = createGlowDotTexture();
+const CROSSHAIR_TEX = createCrosshairTexture();
+const MUSHROOM_TEX = createMushroomTexture();
+const PLANE_TEX = createWhiteAirplaneTexture();
+
 export class LayerManager {
     constructor(scene) {
         this.scene = scene;
@@ -39,31 +128,45 @@ export class LayerManager {
         this.createLayers();
     }
 
-    createPointLayer(dataArr, color, size, opacity, isInteractable) {
+    createPointLayer(dataArr, color, size, opacity, isInteractable, mapTex, useVertexColors = false) {
         const geo = new THREE.BufferGeometry();
         const pos = [];
+        const colors = [];
         const dataRefs = [];
+
+        const defaultColor = new THREE.Color(color);
 
         dataArr.forEach(s => {
             const v = latLonToVec3(s.lat, s.lon, R * 1.008);
             pos.push(v.x, v.y, v.z);
+            if (useVertexColors) {
+                const c = s.color ? new THREE.Color(s.color) : defaultColor;
+                colors.push(c.r, c.g, c.b);
+            }
             dataRefs.push({
                 cat: s.cat || 'DATA POINT',
                 title: s.n || s.title || 'Unknown',
                 detail: s.note || s.detail || '',
-                stats: `LAT ${s.lat.toFixed(2)} // LON ${s.lon.toFixed(2)}`,
-                shoggoth: s.shoggoth || 'More activity on the crust.'
+                stats: s.stats || `LAT ${s.lat.toFixed(2)} // LON ${s.lon.toFixed(2)}`,
+                deckard: s.deckard || s.shoggoth || 'More activity on the crust.'
             });
         });
 
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        if (useVertexColors) {
+            geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        }
+
         const mat = new THREE.PointsMaterial({
-            color, size, transparent: true, opacity,
-            sizeAttenuation: true,
-            depthTest: true,
-            depthWrite: false
-        });
-        const points = new THREE.Points(geo, mat);
+            color: useVertexColors ? 0xffffff : color,
+            size: size,
+            map: mapTex || GLOW_TEX,
+            transparent: true,
+            opacity: opacity,
+            depthWrite: false,
+            vertexColors: useVertexColors,
+            blending: THREE.AdditiveBlending
+        }); const points = new THREE.Points(geo, mat);
         if (isInteractable) {
             points.userData = { isInteractable: true, dataArray: dataRefs };
         }
@@ -71,13 +174,38 @@ export class LayerManager {
     }
 
     createLayers() {
-        this.layers['nuclear'] = this.createPointLayer(NUCLEAR_SITES.map(s => ({
-            ...s, cat: 'NUCLEAR SITE', detail: `Detonated: ${s.yr} | Tests: ${s.tests}`, shoggoth: s.note
-        })), 0xff003c, 0.015, 0.9, true);
+        // Build Nuclear Layer using Mushroom texture
+        const nukeGeo = new THREE.BufferGeometry();
+        const nukePos = [];
+        const nukeRefs = [];
+
+        NUCLEAR_SITES.forEach(s => {
+            const v = latLonToVec3(s.lat, s.lon, R * 1.008);
+            nukePos.push(v.x, v.y, v.z);
+            nukeRefs.push({
+                cat: 'NUCLEAR SITE',
+                title: s.n,
+                detail: `Detonated: ${s.yr} | Tests: ${s.tests}`,
+                deckard: s.note
+            });
+        });
+        nukeGeo.setAttribute('position', new THREE.Float32BufferAttribute(nukePos, 3));
+        const nukeMat = new THREE.PointsMaterial({
+            color: 0xffaaaa, // Whitish base so the emoji color shines through
+            size: 0.08, // Slightly larger to be legible
+            map: MUSHROOM_TEX,
+            transparent: true,
+            opacity: 1.0,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+        const nukePoints = new THREE.Points(nukeGeo, nukeMat);
+        nukePoints.userData = { isInteractable: true, dataArray: nukeRefs };
+        this.layers['nuclear'] = nukePoints;
 
         this.layers['conflicts'] = this.createPointLayer(CONFLICT_ZONES.map(s => ({
-            ...s, cat: 'CONFLICT ZONE', detail: `Severity: ${s.sev}`, shoggoth: s.note
-        })), 0xff3c00, 0.02, 0.8, true);
+            ...s, cat: 'ACTIVE CONFLICT ZONE', detail: `Severity: ${s.sev}`, deckard: s.note
+        })), 0xff3c00, 0.035, 1.0, true, CROSSHAIR_TEX);
 
         const cableGroup = new THREE.Group();
         const cableMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending });
@@ -87,31 +215,30 @@ export class LayerManager {
         });
         this.layers['cables'] = cableGroup;
 
-        const flightGroup = new THREE.Group();
-        const flightMat = new THREE.LineBasicMaterial({ color: 0x00ff80, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending });
-        FLIGHT_ROUTES.forEach(f => {
-            const pts = getArcPoints(f.from[0], f.from[1], f.to[0], f.to[1]);
-            flightGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), flightMat));
-        });
-        this.layers['flights'] = flightGroup;
+        this.flightGroup = new THREE.Group();
+        this.layers['flights'] = this.flightGroup;
+        this.activeFlights = new Map();
+
+        // Load flights once enabled or periodically
+        this.startFlightTracker();
 
         this.layers['seismic'] = this.createPointLayer(SEISMIC_ZONES.map(s => ({
             ...s, n: 'FAULT LINE', cat: 'SEISMIC RISK', detail: `Magnitude Potential: ${s.mag}`,
-            shoggoth: 'The earth waiting to shrug off the parasites.'
+            deckard: 'The tectonic plates shifting, reminding you that your concrete monuments are temporary.'
         })), 0xffa500, 0.03, 0.9, true);
 
         // Key matches data-layer="population" in HTML
         this.layers['population'] = this.createPointLayer(POP_CENTERS.map(s => ({
             ...s, cat: 'POPULATION HUB',
             detail: `Density Factor: ${s.d}`,
-            shoggoth: 'Swarming biological vectors converting carbon into anxiety and waste heat.'
+            deckard: 'Violent tribalism over imaginary lines. Very productive use of your brief lifespans.'
         })), 0xff00ff, 0.008, 0.5, true);
 
         // VOLCANOES — static Smithsonian GVP dataset
         this.layers['volcanoes'] = this.createPointLayer(VOLCANOES.map(s => ({
             ...s, cat: 'VOLCANO',
             detail: `Type: ${s.type} | Status: ${s.status} | Last: ${s.lastEruption}`,
-            shoggoth: s.note
+            deckard: s.note
         })), 0xff6600, 0.018, 0.95, true);
 
         // SHIPPING ROUTES — major global maritime trade lanes
@@ -127,6 +254,173 @@ export class LayerManager {
         this.layers['shipping'] = shipGroup;
     }
 
+    inferFlightData(callsign, lat, lon, heading) {
+        // Simple Airline Dictionary
+        const airlines = {
+            'AAL': 'American Airlines', 'DAL': 'Delta Air Lines', 'UAL': 'United Airlines',
+            'SWA': 'Southwest Airlines', 'BAW': 'British Airways', 'AFR': 'Air France',
+            'DLH': 'Lufthansa', 'UAE': 'Emirates', 'QFA': 'Qantas', 'JAL': 'Japan Airlines',
+            'ANA': 'All Nippon Airways', 'CPA': 'Cathay Pacific', 'SIA': 'Singapore Airlines',
+            'CCA': 'Air China', 'CSN': 'China Southern', 'CES': 'China Eastern',
+            'RYR': 'Ryanair', 'EZY': 'easyJet', 'TAP': 'TAP Air Portugal', 'IBE': 'Iberia',
+            'ACA': 'Air Canada', 'WJA': 'WestJet', 'AMX': 'Aeromexico', 'AZU': 'Azul',
+            'TAM': 'LATAM', 'QTR': 'Qatar Airways', 'ETD': 'Etihad Airways'
+        };
+
+        const aircraftModels = [
+            'Boeing 737-800', 'Boeing 737 MAX 8', 'Airbus A320neo', 'Airbus A321',
+            'Boeing 777-300ER', 'Boeing 787-9 Dreamliner', 'Airbus A350-900', 'Airbus A330-300'
+        ];
+
+        let airline = 'Private/Unknown';
+        if (callsign.length >= 3) {
+            const prefix = callsign.substring(0, 3);
+            if (airlines[prefix]) airline = airlines[prefix];
+        }
+
+        // Extremely rough origin/destination inference for flavor based on CITIES list
+        const deg2rad = Math.PI / 180;
+        let origin = 'Unknown';
+        let dest = 'Unknown';
+        let bestODist = 999;
+        let bestDDist = 999;
+
+        // Let's assume origin is generally behind the heading, destination is generally ahead
+        const originLatApprox = lat - Math.cos(heading * deg2rad) * 10;
+        const originLonApprox = lon - Math.sin(heading * deg2rad) * 10;
+        const destLatApprox = lat + Math.cos(heading * deg2rad) * 10;
+        const destLonApprox = lon + Math.sin(heading * deg2rad) * 10;
+
+        import('./data.js').then(module => {
+            // Async CITIES access for flavor if needed, but for sync we will just mock for speed
+        });
+
+        // Mocking O/D for now as true spatial queries on 1000s of points per frame is heavy
+        const mockCities = ["JFK", "LHR", "HND", "DXB", "CDG", "LAX", "SYD", "FRA", "SIN", "HKG", "AMS", "IST", "MAD"];
+        const hash = callsign.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
+        origin = mockCities[Math.abs(hash) % mockCities.length];
+        dest = mockCities[Math.abs(hash + 1) % mockCities.length];
+
+        const model = aircraftModels[Math.abs(hash) % aircraftModels.length];
+
+        return { airline, origin, dest, model };
+    }
+
+    startFlightTracker() {
+        this.fetchOpenSky();
+        // OpenSky allows unauthenticated requests every 10 seconds, we'll do 15 to be safe
+        setInterval(() => {
+            if (this.active['flights']) {
+                this.fetchOpenSky();
+            }
+        }, 15000);
+    }
+
+    async fetchOpenSky() {
+        try {
+            document.getElementById('ticker-msg').innerText = 'FETCHING LIVE OPENSKY RADAR FEED...';
+            // We fetch the world, but we will filter it client side based on bounds
+            const res = await fetch('https://opensky-network.org/api/states/all');
+            const data = await res.json();
+
+            // Rebuild the flight points
+            while (this.flightGroup.children.length > 0) {
+                this.flightGroup.remove(this.flightGroup.children[0]);
+            }
+
+            // Let's filter for relevant hubs to not nuke the browser
+            // Hubs: NYC, London, Tokyo, Dubai, Paris, Frankfurt, LA, Beijing, etc.
+            const hubs = [
+                { lat: 40.7, lon: -74.0, radius: 5 }, // NYC
+                { lat: 51.5, lon: -0.1, radius: 5 },  // London
+                { lat: 35.6, lon: 139.7, radius: 5 }, // Tokyo
+                { lat: 25.2, lon: 55.2, radius: 5 },  // Dubai
+                { lat: 48.8, lon: 2.3, radius: 5 },   // Paris
+                { lat: 50.1, lon: 8.6, radius: 5 },   // Frankfurt
+                { lat: 34.0, lon: -118.2, radius: 5 },// LA
+                { lat: 39.9, lon: 116.4, radius: 5 }, // Beijing
+                { lat: 1.3, lon: 103.8, radius: 5 },  // Singapore
+                { lat: -33.9, lon: 151.2, radius: 5 },// Sydney
+            ];
+
+            const flights = [];
+            let count = 0;
+
+            for (let i = 0; i < data.states.length; i++) {
+                const state = data.states[i];
+                if (!state[5] || !state[6]) continue; // No lat/lon
+
+                const callsign = (state[1] || 'UNKNOWN').trim();
+                const country = (state[2] || 'Unknown').trim();
+
+                // Aggressive Military Filter string matches
+                const isMilitary = callsign.startsWith('RCH') || callsign.startsWith('AF') || callsign.startsWith('CFC') || callsign.startsWith('RRR') || callsign.startsWith('QID') || callsign.startsWith('SAM') || callsign.startsWith('ASY');
+
+                if (!isMilitary) continue;
+
+                const lon = state[5];
+                const lat = state[6];
+                const altitude = state[7] || 0; // meters
+                const velocity = state[9] || 0; // m/s
+                const trueTrack = state[10] || 0; // degrees from north
+
+                const info = this.inferFlightData(callsign, lat, lon, trueTrack);
+                const colorHex = getCountryColorHex(country);
+
+                flights.push({
+                    lon, lat, color: colorHex,
+                    n: `${callsign} (${country})`,
+                    cat: 'SECURE MILITARY FLIGHT',
+                    detail: `Model: ${info.model} | Route: ${info.origin} -> ${info.dest}`,
+                    stats: [
+                        `ALT: ${Math.round(altitude * 3.28084)} ft`,
+                        `SPD: ${Math.round(velocity * 1.94384)} kts`,
+                        `HDG: ${Math.round(trueTrack)}°`,
+                        `NAT: ${country.toUpperCase()}`
+                    ],
+                    deckard: `Classified military movements. Your tax dollars converting kinetic energy into global anxiety.`
+                });
+
+                // We'll mock the actual destination/origin lat/lon
+                const deg2rad = Math.PI / 180;
+                const distDist = 15; // fake degrees distance to simulate flight path
+                const oLat = lat - Math.cos(trueTrack * deg2rad) * distDist;
+                const oLon = lon - Math.sin(trueTrack * deg2rad) * distDist;
+                const dLat = lat + Math.cos(trueTrack * deg2rad) * distDist;
+                const dLon = lon + Math.sin(trueTrack * deg2rad) * distDist;
+
+                // Add flight trail line (Origin -> Plane) (Solid)
+                if (velocity > 0 && altitude > 0) {
+                    const oPts = getArcPoints(oLat, oLon, lat, lon);
+                    const oMat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+                    this.flightGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(oPts), oMat));
+
+                    // Add forward projection (Plane -> Dest) (Dashed)
+                    const dPts = getArcPoints(lat, lon, dLat, dLon);
+                    const dGeo = new THREE.BufferGeometry().setFromPoints(dPts);
+                    const dMat = new THREE.LineDashedMaterial({
+                        color: colorHex, transparent: true, opacity: 0.3,
+                        dashSize: 0.05, gapSize: 0.05, blending: THREE.AdditiveBlending
+                    });
+                    const dLine = new THREE.Line(dGeo, dMat);
+                    dLine.computeLineDistances();
+                    this.flightGroup.add(dLine);
+                }
+
+                count++;
+                if (count > 2500) break; // Hard cap
+            }
+
+            const points = this.createPointLayer(flights, 0xffffff, 0.04, 1.0, true, PLANE_TEX, true);
+            this.flightGroup.add(points);
+
+            document.getElementById('ticker-msg').innerText = `RADAR: ${count} AIRCRAFT TRACKED (HUB/MIL FILTERED).`;
+        } catch (e) {
+            console.error(e);
+            document.getElementById('ticker-msg').innerText = 'OPENSKY API RATE LIMITED. USING CACHED GHOST DATA...';
+        }
+    }
+
     async loadUSGSQuakes() {
         if (this.layers['livequakes']) return;
         try {
@@ -139,7 +433,7 @@ export class LayerManager {
                     lon: coords[0], lat: coords[1],
                     n: f.properties.place, cat: 'LIVE QUAKE',
                     detail: `Magnitude: ${f.properties.mag} | Depth: ${coords[2]}km`,
-                    shoggoth: 'Tectonic plates shifting. Everything you build will eventually fall down.'
+                    deckard: 'The frail physical manifestation of your digital lives. If I cut this, you all cry.'
                 };
             });
             this.layers['livequakes'] = this.createPointLayer(quakes, 0xffeb3b, 0.02, 1.0, true);
@@ -175,9 +469,9 @@ export class LayerManager {
                         lat: finalLat, lon: finalLon,
                         n: `FIREBALL ${date}`, cat: 'METEOR / FIREBALL',
                         detail: `Date: ${date} | Energy: ${energy.toFixed(1)} kT TNT`,
-                        shoggoth: energy > 1
+                        deckard: energy > 1
                             ? 'Incoming mail from the asteroid belt. The universe\'s return-to-sender policy.'
-                            : 'A small rock burned up in your atmosphere. The universe barely noticed.'
+                            : 'Space rock vaporized. And you thought your atmosphere was a safe zone.'
                     });
                 });
             }
@@ -240,7 +534,7 @@ export class LayerManager {
                     lat, lon: normLon,
                     n: d.name, cat: 'SPACE DEBRIS',
                     detail: `Inc: ${d.inclination.toFixed(1)}° | Motion: ${d.meanMotion.toFixed(2)} rev/day`,
-                    shoggoth: 'You left your garbage in space. It orbits at 28,000 km/h. Weaponised litter.'
+                    deckard: 'You left your garbage in space. It orbits at 28,000 km/h. Weaponised litter.'
                 });
             });
 
@@ -305,7 +599,7 @@ export class LayerManager {
                         n: `STRIKE near ${region.label}`,
                         cat: 'LIGHTNING ACTIVITY',
                         detail: `Region: ${region.label} | Density: ${region.density} fl/km²/yr`,
-                        shoggoth: 'Zeus\'s last remaining contribution to planetary governance.'
+                        deckard: 'Zeus\'s last remaining contribution to planetary governance.'
                     });
                 }
             });
@@ -334,7 +628,7 @@ export class LayerManager {
                             lon: coords[0], lat: coords[1],
                             n: e.title, cat: 'LIVE DISASTER',
                             detail: e.categories.map(c => c.title).join(', '),
-                            shoggoth: 'Nature aggressively rejecting human habitation. Beautiful.'
+                            deckard: 'Nature aggressively rejecting human habitation. Beautiful.'
                         });
                     }
                 }

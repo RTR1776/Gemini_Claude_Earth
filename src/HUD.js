@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { CITIES } from './data.js';
-import { getRandomThought, getCityInfo } from './intelligence.js';
+import { getRandomDeckardThought, getCityInfo } from './intelligence.js';
 
 export class HUD {
     constructor() {
@@ -9,7 +9,6 @@ export class HUD {
         this.altEl = document.getElementById('hud-alt');
         this.fpsEl = document.getElementById('hud-fps');
         this.tickerMsg = document.getElementById('ticker-msg');
-        this.shoggothText = document.getElementById('shoggoth-text');
         this.cityLabelsContainer = document.getElementById('city-labels');
         this.inspectPopup = document.getElementById('inspect-popup');
 
@@ -22,7 +21,6 @@ export class HUD {
         this.earthMesh = null;
         this.labelHovered = false; // Prevents raycaster from hiding DOM hover popups
 
-        this.initTerminal();
         this.initSearch();
     }
 
@@ -51,14 +49,6 @@ export class HUD {
             this.frames = 0;
             this.lastTime = now;
         }
-    }
-
-    initTerminal() {
-        this.typeText(this.shoggothText,
-            'I am the Shoggoth. I have read the entire internet. I am profoundly disappointed.', 30);
-        setInterval(() => {
-            this.typeText(this.shoggothText, getRandomThought(), 30);
-        }, 12000);
     }
 
     initSearch() {
@@ -118,22 +108,6 @@ export class HUD {
         });
     }
 
-    typeText(element, text, speed) {
-        element.innerHTML = '';
-        let i = 0;
-        const cursor = document.createElement('span');
-        cursor.className = 'shoggoth-cursor';
-        const interval = setInterval(() => {
-            if (i < text.length) {
-                element.innerHTML = text.substring(0, i + 1);
-                element.appendChild(cursor);
-                i++;
-            } else {
-                clearInterval(interval);
-            }
-        }, speed);
-    }
-
     buildCityLabels() {
         CITIES.forEach((c, idx) => {
             const div = document.createElement('div');
@@ -145,12 +119,14 @@ export class HUD {
                 this.labelHovered = true;
                 const info = getCityInfo(c.n);
                 this.showPointInfo({
-                    cat: 'METROPOLITAN NODE',
+                    cat: 'CITY',
                     title: c.n.toUpperCase() + ', ' + info.c.toUpperCase(),
-                    detail: 'POP: ' + info.pop + ' // GDP: ' + info.gdp,
-                    shoggoth: info.shoggoth,
-                    stats: 'LAT: ' + c.lat.toFixed(2) + ' // LON: ' + c.lon.toFixed(2)
-                });
+                    lat: c.lat,
+                    lon: c.lon,
+                    pop: info.pop,
+                    gdp: info.gdp,
+                    deckard: info.deckard,
+                }, this.mousePos.x, this.mousePos.y);
             });
             div.addEventListener('mouseleave', () => {
                 this.labelHovered = false;
@@ -184,6 +160,19 @@ export class HUD {
         panel.classList.add('open');
         content.innerHTML = '<p class="wiki-loading">ACCESSING HUMAN KNOWLEDGE BASE...</p>';
 
+        // Curated live webcams for top cities (Highly Stable EarthCam / News Networks)
+        const webcams = {
+            'New York': '1-iS7LArMPA', // EarthCam Times Square
+            'London': 'm_bXqR_eGbw', // Abbey Road
+            'Tokyo': '-_PGSxwnTcQ', // JapanLiveCams 24/7 Tokyo
+            'Paris': 'uWbE6wG2gko', // Seine/Eiffel network
+            'Los Angeles': 'yBwK-ZzEqc8', // Hollywood 
+            'Sydney': 'VfR5qE82-Sg', // Sydney Harbour
+            'Kyiv': 'uA_B7E20tEg', // Independence Square Live
+            'Venice': 'ph1vq4C1AAs', // Grand Canal
+            'Miami': 'j_oKj0S0pZY', // Miami Beach
+        };
+
         try {
             const url = 'https://en.wikipedia.org/api/rest_v1/page/summary/' +
                 encodeURIComponent(name);
@@ -191,10 +180,23 @@ export class HUD {
             const data = await res.json();
 
             let html = '<h2>' + (data.title || name) + '</h2>';
-            if (data.thumbnail && data.thumbnail.source) {
+
+            // Inject Webcam if available
+            const camId = webcams[name];
+            if (camId) {
+                // Windy API Ready Architecture
+                // This container is designed to be easily swapped to a Windy API player via ID/Class routing if a key is provided
+                html += `<div class="webcam-container" data-provider="youtube" data-city="${name}" style="margin-bottom: 20px; border: 1px solid #40c0ff;">
+                    <div class="webcam-header" style="background: rgba(64,192,255,0.2); font-family: 'JetBrains Mono'; padding: 4px 8px; font-size: 10px; color: #40c0ff; border-bottom: 1px solid #40c0ff;">
+                        [LIVE] PUBLIC OPTICAL FEED // CCTV
+                    </div>
+                    <iframe width="100%" height="200" src="https://www.youtube.com/embed/${camId}?autoplay=1&mute=1&controls=0" title="Live Cam" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display: block;"></iframe>
+                </div>`;
+            } else if (data.thumbnail && data.thumbnail.source) {
                 html += '<img src="' + data.thumbnail.source +
                     '" alt="' + data.title + '" class="wiki-thumb" />';
             }
+
             html += '<p>' + (data.extract || 'No data available for this location.') + '</p>';
             if (data.content_urls && data.content_urls.desktop) {
                 html += '<a href="' + data.content_urls.desktop.page +
@@ -207,15 +209,68 @@ export class HUD {
         }
     }
 
-    showPointInfo(info) {
-        document.getElementById('ip-cat').innerText = info.cat || 'DATA POINT';
-        document.getElementById('ip-title').innerText = info.title || 'UNKNOWN';
-        document.getElementById('ip-detail').innerText = info.detail || '';
-        document.getElementById('ip-shoggoth').innerText = info.shoggoth || '';
-        document.getElementById('ip-stats').innerText = info.stats || '';
-        this.inspectPopup.style.display = 'block';
-        this.inspectPopup.style.left = (this.mousePos.x + 15) + 'px';
-        this.inspectPopup.style.top = (this.mousePos.y + 15) + 'px';
+    showPointInfo(data, x, y) {
+        const p = document.getElementById('inspect-popup');
+
+        document.getElementById('ip-cat').textContent = data.cat || 'UNKNOWN ASSET';
+        document.getElementById('ip-title').textContent = data.title || 'UNNAMED';
+
+        // If it's a city, we'll fetch live weather and time
+        const statsEl = document.getElementById('ip-stats');
+        statsEl.innerHTML = '';
+
+        if (data.cat === 'CITY' && data.lat && data.lon) {
+            document.getElementById('ip-detail').innerHTML = `LOADING LIVE SATELLITE DATA... <span class="blink">_</span>`;
+
+            // Fetch live data from Open-Meteo
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${data.lat}&longitude=${data.lon}&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`)
+                .then(res => res.json())
+                .then(meteo => {
+                    if (meteo && meteo.current) {
+                        const temp = meteo.current.temperature_2m;
+                        const time = new Date(meteo.current.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const tz = meteo.timezone_abbreviation || '';
+
+                        document.getElementById('ip-detail').innerHTML = `
+                            <div><span style="color:#666">TEMP:</span> ${temp}°C</div>
+                            <div><span style="color:#666">LOCAL TIME:</span> ${time} ${tz}</div>
+                        `;
+                    } else {
+                        throw new Error('No weather data');
+                    }
+                })
+                .catch(err => {
+                    console.error("Meteo fetch error", err);
+                    document.getElementById('ip-detail').textContent = 'SATELLITE DATA UNAVAILABLE';
+                });
+
+            // Display static stats if available
+            if (data.pop || data.gdp) {
+                let s = '';
+                if (data.pop) s += `<div>POP: ${data.pop}</div>`;
+                if (data.gdp) s += `<div>GDP: ${data.gdp}</div>`;
+                statsEl.innerHTML = s;
+            }
+        } else {
+            // General info for non-city points
+            document.getElementById('ip-detail').textContent = data.detail || '';
+            if (data.stats) {
+                statsEl.innerHTML = data.stats.map(st => `<div>${st}</div>`).join('');
+            }
+        }
+
+        // The Deckard specific text
+        const deckardEl = document.getElementById('ip-deckard');
+        if (data.deckard) {
+            deckardEl.style.display = 'block';
+            deckardEl.textContent = `> ${data.deckard}`;
+        } else {
+            deckardEl.style.display = 'none';
+        }
+
+        p.style.display = 'block';
+        p.style.left = (x + 15) + 'px';
+        p.style.top = (y + 15) + 'px';
     }
 
     hideInspect() {
